@@ -1,0 +1,16 @@
+---
+title: "Weight lifting Analysis"
+author: "Reza"
+date: "29 April 2016"
+output: html_document
+---
+
+#Introduction
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, our goal is to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in five different ways. One totally right and the four others with a common mistake.
+We will predict how well a given person done the job using these accelerometers.
+
+More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).
+
+#Data Explanation
+The provided dataset contains the the name of voluonteer, time stamp, `r 160-7-1-96` measurment by accelometers, 96 statistica calculated by moving window on them and the class of actvity, A for totally right and B-E for four commom mistakes. As we are supposed to predict the class of activity based on sigle measurments by acceleometers, we can not use statistics. 
+
