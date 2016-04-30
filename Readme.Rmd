@@ -39,7 +39,7 @@ library(caret)
 ###Exploring and cleaning the dataset
 Then I took a look at variables names.
 ```{r }
-names(roughtrainig)
+print(names(roughtrainig))
 ```
 
 The names of variables containing statistics started with one of the words, "max", "min", "stddev", "avg", "amplitude", "kurtosis","skewness" or "var". So I checked which columns contain these data and removed them.
@@ -92,7 +92,7 @@ modelTree <- train(classe~., data=training, method="rpart")
 ```
 Then ran the varImp to get the most important variables.
 ```{r}
-varImp(modelTree)
+print(varImp(modelTree))
 ```
 I filtered the variables which have 14% or more importance.
 ```{r}
@@ -145,7 +145,7 @@ validation <- validation[,Impvars2]
 Now predict the class of each row and show the result
 ```{r message=FALSE}
 predVali <- predict(modelRF, validation)
-data.frame(Row.Number=as.factor(1:20),Predicted.Class=predVali)
+print(data.frame(Row.Number=as.factor(1:20),Predicted.Class=predVali))
 ```
 #Reference
 Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013.

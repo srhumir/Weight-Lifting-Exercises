@@ -62,7 +62,7 @@ First of all the data are downloaded and loaded into R
 
 Then I took a look at variables names.
 
-    names(roughtrainig)
+    print(names(roughtrainig))
 
     ##   [1] "X"                        "user_name"               
     ##   [3] "raw_timestamp_part_1"     "raw_timestamp_part_2"    
@@ -209,7 +209,7 @@ which by the way did not show a good out of sample accuracy.
 
 Then ran the varImp to get the most important variables.
 
-    varImp(modelTree)
+    print(varImp(modelTree))
 
     ## rpart variable importance
     ## 
@@ -301,7 +301,7 @@ numeric.
 Now predict the class of each row and show the result
 
     predVali <- predict(modelRF, validation)
-    data.frame(Row.Number=as.factor(1:20),Predicted.Class=predVali)
+    print(data.frame(Row.Number=as.factor(1:20),Predicted.Class=predVali))
 
     ##    Row.Number Predicted.Class
     ## 1           1               B
