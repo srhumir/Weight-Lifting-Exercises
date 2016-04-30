@@ -31,17 +31,17 @@ if (!file.exists("pml-testing.csv")){
 roughtrainig <- read.csv("pml-trainig.csv")
 roughtesting <- read.csv("pml-testing.csv")
 ```
-```{r echo=FALSE}
+```{r echo=FALSE, message=FALSE}
 library(caret)
 ```
 Then I took a look at variables names.
 ```{r }
-names(roughtrainig)[1:10]
+names(roughtrainig)
 ```
 
 The names of variables contiaing statisctics started with one of the wrods, "max", "min", "stddev", "avg", "amplitude", "kurtosis","skewness" or "var". So I check which columns contain these data and removed them.
 ```{r}
-#Getting the field with statistics
+#Getting the variables containig statistics
 indlist <- sapply(list("max", "min", "stddev", "avg", "amplitude", "kurtosis","skewness", "^var"),
               function(s) grep(s, names(roughtrainig)))
 ind <-vector() 
@@ -77,24 +77,65 @@ indtrain <- createDataPartition(data$classe, p = .5, list = F)
 training <- data[indtrain,]
 testing <- data[-indtrain,]
 ```
-To reduce the number of variales, one idea would be using PCA. I tried that too but did not get better result. So I decided to use another method. 
+To reduce the number of variales, one idea would be using PCA. I tried that too but did not get better result with lots of more proccesing time. So I decided to use another method. 
 
-As the other approach I used the variable importance function in "caret". I firstly trained a decision tree model on all the data which by the way did not show a good out of sample accuracy.
-```{r}
+In the other approach I used the variable importance function in "caret". I firstly trained a decision tree model (rpart) on all the data which by the way did not show a good out of sample accuracy.
+```{r message=FALSE}
 modelTree <- train(classe~., data=training, method="rpart")
 ```
-Then ran the varImp to get the first 20 important variables.
+Then ran the varImp to get the most important variables.
 ```{r}
 varImp(modelTree)
 ```
-I choosed the variables which have 25% or more importance.
+I filtered the variables which have 14% or more importance.
 ```{r}
-Impvars2 <- row.names(varImp(modelTree)$importance)[varImp(modelTree)$importance >25]
+Impvars2 <- row.names(varImp(modelTree)$importance)[varImp(modelTree)$importance >14]
 ```
-Leave us by `r length(Impvar2)` variables. 
+Leave us by `r length(Impvars2)` variables. 
 
-Now I seperate just these `r length(Impvar2)` variables and train a random forest model on them.
-```{R cache=TRUE}
+Now I seperate just these `r length(Impvars2)` variables and train a random forest model on them.
+```{R cache=TRUE, message=FALSE}
 trainingRF <- training[,Impvars2]
 modelRF <- train(trainingRF, training$classe, method = "rf")
+```
+
+##Testing the model
+Now it is time to test the model. First choose important variables on the testing dataset.
+```{r message=FALSE}
+#test the model
+testinRF <- testing[,Impvars2]
+```
+Then predict the classes using our model
+```{r message=FALSE}
+predRF <- predict(modelRF, testing)
+```
+Finally make the confusion matrix.
+```{r message=FALSE}
+confMat <- confusionMatrix(predRF, testing$classe)
+```
+The overall accuracy of the model is `r round(confMat$overall["Accuracy"], digits=4)*100`% acceptingly good. The better news is that the sensitivity and specifity on class "A" (doing the job right) are respectively `r round(confMat$byClass[1,"Sensitivity"], digits=4)` and `r round(confMat$byClass[1,"Specificity"], digits=4)`. This means that when the prediction is "A" we are `r round(confMat$byClass[1,"Sensitivity"], digits=4)*100`% confident that the job was done right and when the prediction is not "A", we are `r round(confMat$byClass[1,"Specificity"], digits=4)*100`% confident that the job was really done wrong. 
+
+##Predicting the provided test data
+In this section I run the model on the test dataset provided and loaded in first section by name "roughtesting". 
+
+First the dataset should look like our trainig dataset i.e. extra variables have to be removed and variables have to be converted to numeric.
+```{r message=FALSE}
+##remove statistics
+validation <- roughtesting[,-ind]
+#removing first 7 columns
+validation <- validation[, -c(1:7)]
+#converting all data to numeric
+for (i in 1:(dim(validation)[2]-1)){
+        validation[,i] <- as.numeric(validation[,i])
+}
+
+##removing highly coorelated
+validation <- validation[,-highlyCorrelated]
+##removng less important variables
+validation <- validation[,Impvars2]
+```
+Now predict the class of each row and show the result
+```{r message=FALSE}
+predVali <- predict(modelRF, validation)
+data.frame(Row.Number=as.factor(1:20),Predicted.Class=predVali)
 ```

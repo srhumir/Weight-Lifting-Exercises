@@ -141,16 +141,90 @@ if (!file.exists(&quot;pml-testing.csv&quot;)){
 }
 roughtrainig &lt;- read.csv(&quot;pml-trainig.csv&quot;)
 roughtesting &lt;- read.csv(&quot;pml-testing.csv&quot;)</code></pre>
-<pre><code>## Loading required package: lattice</code></pre>
-<pre><code>## Loading required package: ggplot2</code></pre>
 <p>Then I took a look at variables names.</p>
-<pre class="r"><code>names(roughtrainig)[1:10]</code></pre>
-<pre><code>##  [1] &quot;X&quot;                    &quot;user_name&quot;            &quot;raw_timestamp_part_1&quot;
-##  [4] &quot;raw_timestamp_part_2&quot; &quot;cvtd_timestamp&quot;       &quot;new_window&quot;          
-##  [7] &quot;num_window&quot;           &quot;roll_belt&quot;            &quot;pitch_belt&quot;          
-## [10] &quot;yaw_belt&quot;</code></pre>
+<pre class="r"><code>names(roughtrainig)</code></pre>
+<pre><code>##   [1] &quot;X&quot;                        &quot;user_name&quot;               
+##   [3] &quot;raw_timestamp_part_1&quot;     &quot;raw_timestamp_part_2&quot;    
+##   [5] &quot;cvtd_timestamp&quot;           &quot;new_window&quot;              
+##   [7] &quot;num_window&quot;               &quot;roll_belt&quot;               
+##   [9] &quot;pitch_belt&quot;               &quot;yaw_belt&quot;                
+##  [11] &quot;total_accel_belt&quot;         &quot;kurtosis_roll_belt&quot;      
+##  [13] &quot;kurtosis_picth_belt&quot;      &quot;kurtosis_yaw_belt&quot;       
+##  [15] &quot;skewness_roll_belt&quot;       &quot;skewness_roll_belt.1&quot;    
+##  [17] &quot;skewness_yaw_belt&quot;        &quot;max_roll_belt&quot;           
+##  [19] &quot;max_picth_belt&quot;           &quot;max_yaw_belt&quot;            
+##  [21] &quot;min_roll_belt&quot;            &quot;min_pitch_belt&quot;          
+##  [23] &quot;min_yaw_belt&quot;             &quot;amplitude_roll_belt&quot;     
+##  [25] &quot;amplitude_pitch_belt&quot;     &quot;amplitude_yaw_belt&quot;      
+##  [27] &quot;var_total_accel_belt&quot;     &quot;avg_roll_belt&quot;           
+##  [29] &quot;stddev_roll_belt&quot;         &quot;var_roll_belt&quot;           
+##  [31] &quot;avg_pitch_belt&quot;           &quot;stddev_pitch_belt&quot;       
+##  [33] &quot;var_pitch_belt&quot;           &quot;avg_yaw_belt&quot;            
+##  [35] &quot;stddev_yaw_belt&quot;          &quot;var_yaw_belt&quot;            
+##  [37] &quot;gyros_belt_x&quot;             &quot;gyros_belt_y&quot;            
+##  [39] &quot;gyros_belt_z&quot;             &quot;accel_belt_x&quot;            
+##  [41] &quot;accel_belt_y&quot;             &quot;accel_belt_z&quot;            
+##  [43] &quot;magnet_belt_x&quot;            &quot;magnet_belt_y&quot;           
+##  [45] &quot;magnet_belt_z&quot;            &quot;roll_arm&quot;                
+##  [47] &quot;pitch_arm&quot;                &quot;yaw_arm&quot;                 
+##  [49] &quot;total_accel_arm&quot;          &quot;var_accel_arm&quot;           
+##  [51] &quot;avg_roll_arm&quot;             &quot;stddev_roll_arm&quot;         
+##  [53] &quot;var_roll_arm&quot;             &quot;avg_pitch_arm&quot;           
+##  [55] &quot;stddev_pitch_arm&quot;         &quot;var_pitch_arm&quot;           
+##  [57] &quot;avg_yaw_arm&quot;              &quot;stddev_yaw_arm&quot;          
+##  [59] &quot;var_yaw_arm&quot;              &quot;gyros_arm_x&quot;             
+##  [61] &quot;gyros_arm_y&quot;              &quot;gyros_arm_z&quot;             
+##  [63] &quot;accel_arm_x&quot;              &quot;accel_arm_y&quot;             
+##  [65] &quot;accel_arm_z&quot;              &quot;magnet_arm_x&quot;            
+##  [67] &quot;magnet_arm_y&quot;             &quot;magnet_arm_z&quot;            
+##  [69] &quot;kurtosis_roll_arm&quot;        &quot;kurtosis_picth_arm&quot;      
+##  [71] &quot;kurtosis_yaw_arm&quot;         &quot;skewness_roll_arm&quot;       
+##  [73] &quot;skewness_pitch_arm&quot;       &quot;skewness_yaw_arm&quot;        
+##  [75] &quot;max_roll_arm&quot;             &quot;max_picth_arm&quot;           
+##  [77] &quot;max_yaw_arm&quot;              &quot;min_roll_arm&quot;            
+##  [79] &quot;min_pitch_arm&quot;            &quot;min_yaw_arm&quot;             
+##  [81] &quot;amplitude_roll_arm&quot;       &quot;amplitude_pitch_arm&quot;     
+##  [83] &quot;amplitude_yaw_arm&quot;        &quot;roll_dumbbell&quot;           
+##  [85] &quot;pitch_dumbbell&quot;           &quot;yaw_dumbbell&quot;            
+##  [87] &quot;kurtosis_roll_dumbbell&quot;   &quot;kurtosis_picth_dumbbell&quot; 
+##  [89] &quot;kurtosis_yaw_dumbbell&quot;    &quot;skewness_roll_dumbbell&quot;  
+##  [91] &quot;skewness_pitch_dumbbell&quot;  &quot;skewness_yaw_dumbbell&quot;   
+##  [93] &quot;max_roll_dumbbell&quot;        &quot;max_picth_dumbbell&quot;      
+##  [95] &quot;max_yaw_dumbbell&quot;         &quot;min_roll_dumbbell&quot;       
+##  [97] &quot;min_pitch_dumbbell&quot;       &quot;min_yaw_dumbbell&quot;        
+##  [99] &quot;amplitude_roll_dumbbell&quot;  &quot;amplitude_pitch_dumbbell&quot;
+## [101] &quot;amplitude_yaw_dumbbell&quot;   &quot;total_accel_dumbbell&quot;    
+## [103] &quot;var_accel_dumbbell&quot;       &quot;avg_roll_dumbbell&quot;       
+## [105] &quot;stddev_roll_dumbbell&quot;     &quot;var_roll_dumbbell&quot;       
+## [107] &quot;avg_pitch_dumbbell&quot;       &quot;stddev_pitch_dumbbell&quot;   
+## [109] &quot;var_pitch_dumbbell&quot;       &quot;avg_yaw_dumbbell&quot;        
+## [111] &quot;stddev_yaw_dumbbell&quot;      &quot;var_yaw_dumbbell&quot;        
+## [113] &quot;gyros_dumbbell_x&quot;         &quot;gyros_dumbbell_y&quot;        
+## [115] &quot;gyros_dumbbell_z&quot;         &quot;accel_dumbbell_x&quot;        
+## [117] &quot;accel_dumbbell_y&quot;         &quot;accel_dumbbell_z&quot;        
+## [119] &quot;magnet_dumbbell_x&quot;        &quot;magnet_dumbbell_y&quot;       
+## [121] &quot;magnet_dumbbell_z&quot;        &quot;roll_forearm&quot;            
+## [123] &quot;pitch_forearm&quot;            &quot;yaw_forearm&quot;             
+## [125] &quot;kurtosis_roll_forearm&quot;    &quot;kurtosis_picth_forearm&quot;  
+## [127] &quot;kurtosis_yaw_forearm&quot;     &quot;skewness_roll_forearm&quot;   
+## [129] &quot;skewness_pitch_forearm&quot;   &quot;skewness_yaw_forearm&quot;    
+## [131] &quot;max_roll_forearm&quot;         &quot;max_picth_forearm&quot;       
+## [133] &quot;max_yaw_forearm&quot;          &quot;min_roll_forearm&quot;        
+## [135] &quot;min_pitch_forearm&quot;        &quot;min_yaw_forearm&quot;         
+## [137] &quot;amplitude_roll_forearm&quot;   &quot;amplitude_pitch_forearm&quot; 
+## [139] &quot;amplitude_yaw_forearm&quot;    &quot;total_accel_forearm&quot;     
+## [141] &quot;var_accel_forearm&quot;        &quot;avg_roll_forearm&quot;        
+## [143] &quot;stddev_roll_forearm&quot;      &quot;var_roll_forearm&quot;        
+## [145] &quot;avg_pitch_forearm&quot;        &quot;stddev_pitch_forearm&quot;    
+## [147] &quot;var_pitch_forearm&quot;        &quot;avg_yaw_forearm&quot;         
+## [149] &quot;stddev_yaw_forearm&quot;       &quot;var_yaw_forearm&quot;         
+## [151] &quot;gyros_forearm_x&quot;          &quot;gyros_forearm_y&quot;         
+## [153] &quot;gyros_forearm_z&quot;          &quot;accel_forearm_x&quot;         
+## [155] &quot;accel_forearm_y&quot;          &quot;accel_forearm_z&quot;         
+## [157] &quot;magnet_forearm_x&quot;         &quot;magnet_forearm_y&quot;        
+## [159] &quot;magnet_forearm_z&quot;         &quot;classe&quot;</code></pre>
 <p>The names of variables contiaing statisctics started with one of the wrods, “max”, “min”, “stddev”, “avg”, “amplitude”, “kurtosis”,“skewness” or “var”. So I check which columns contain these data and removed them.</p>
-<pre class="r"><code>#Getting the field with statistics
+<pre class="r"><code>#Getting the variables containig statistics
 indlist &lt;- sapply(list(&quot;max&quot;, &quot;min&quot;, &quot;stddev&quot;, &quot;avg&quot;, &quot;amplitude&quot;, &quot;kurtosis&quot;,&quot;skewness&quot;, &quot;^var&quot;),
               function(s) grep(s, names(roughtrainig)))
 ind &lt;-vector() 
@@ -171,7 +245,101 @@ for (i in 1:(dim(data)[2]-1)){
 correlationMatrix &lt;- cor(data[,-dim(data)[2]])
 highlyCorrelated &lt;- findCorrelation(correlationMatrix, cutoff=.8)
 data &lt;- data[,-highlyCorrelated]</code></pre>
-<p>13 variables are removed leaving 40 variables. But it is still too much for runnig a random forest.</p>
+<p>13 variables are removed leaving 39 variables. But it is still too much for runnig a random forest. First divide the dataset to trainig and testing subsets half of data to each subset.</p>
+<pre class="r"><code>#divide to trian and test
+set.seed(1234)
+indtrain &lt;- createDataPartition(data$classe, p = .5, list = F)
+training &lt;- data[indtrain,]
+testing &lt;- data[-indtrain,]</code></pre>
+<p>To reduce the number of variales, one idea would be using PCA. I tried that too but did not get better result with lots of more proccesing time. So I decided to use another method.</p>
+<p>In the other approach I used the variable importance function in “caret”. I firstly trained a decision tree model (rpart) on all the data which by the way did not show a good out of sample accuracy.</p>
+<pre class="r"><code>modelTree &lt;- train(classe~., data=training, method=&quot;rpart&quot;)</code></pre>
+<p>Then ran the varImp to get the most important variables.</p>
+<pre class="r"><code>varImp(modelTree)</code></pre>
+<pre><code>## rpart variable importance
+## 
+##   only 20 most important variables shown (out of 39)
+## 
+##                   Overall
+## magnet_dumbbell_y  100.00
+## magnet_belt_y       89.00
+## total_accel_belt    80.95
+## yaw_belt            74.74
+## pitch_forearm       68.55
+## magnet_dumbbell_z   52.17
+## magnet_arm_x        31.78
+## gyros_belt_z        27.88
+## roll_forearm        23.79
+## roll_dumbbell       21.83
+## magnet_dumbbell_x   21.59
+## accel_dumbbell_y    16.89
+## roll_arm            15.58
+## accel_forearm_x     14.50
+## magnet_forearm_z    12.47
+## accel_forearm_y      0.00
+## magnet_belt_x        0.00
+## yaw_dumbbell         0.00
+## accel_forearm_z      0.00
+## accel_arm_y          0.00</code></pre>
+<p>I filtered the variables which have 14% or more importance.</p>
+<pre class="r"><code>Impvars2 &lt;- row.names(varImp(modelTree)$importance)[varImp(modelTree)$importance &gt;14]</code></pre>
+<p>Leave us by 14 variables.</p>
+<p>Now I seperate just these 14 variables and train a random forest model on them.</p>
+<pre class="r"><code>trainingRF &lt;- training[,Impvars2]
+modelRF &lt;- train(trainingRF, training$classe, method = &quot;rf&quot;)</code></pre>
+<div id="testing-the-model" class="section level2">
+<h2>Testing the model</h2>
+<p>Now it is time to test the model. First choose important variables on the testing dataset.</p>
+<pre class="r"><code>#test the model
+testinRF &lt;- testing[,Impvars2]</code></pre>
+<p>Then predict the classes using our model</p>
+<pre class="r"><code>predRF &lt;- predict(modelRF, testing)</code></pre>
+<p>Finally make the confusion matrix.</p>
+<pre class="r"><code>confMat &lt;- confusionMatrix(predRF, testing$classe)</code></pre>
+<p>The overall accuracy of the model is 96.95% acceptingly good. The better news is that the sensitivity and specifity on class “A” (doing the job right) are respectively 0.99 and 0.9906. This means when the prediction is “A” we are 99% confident that the job was done right and when the prediction is not “A”, we are 99.06% confident that the job was really done wrong.</p>
+</div>
+<div id="predicting-the-provided-test-data" class="section level2">
+<h2>Predicting the provided test data</h2>
+<p>In this section I run the model on the test dataset provided and loaded in first section by name “roughtesting”.</p>
+<p>First the dataset should look like our trainig dataset i.e. extra variables have to be removed and variables have to be converted to numeric.</p>
+<pre class="r"><code>##remove statistics
+validation &lt;- roughtesting[,-ind]
+#removing first 7 columns
+validation &lt;- validation[, -c(1:7)]
+#converting all data to numeric
+for (i in 1:(dim(validation)[2]-1)){
+        validation[,i] &lt;- as.numeric(validation[,i])
+}
+
+##removing highly coorelated
+validation &lt;- validation[,-highlyCorrelated]
+##removng less important variables
+validation &lt;- validation[,Impvars2]</code></pre>
+<p>Now predict the class of each row and show the result</p>
+<pre class="r"><code>predVali &lt;- predict(modelRF, validation)
+data.frame(Row.Number=as.factor(1:20),Predicted.Class=predVali)</code></pre>
+<pre><code>##    Row.Number Predicted.Class
+## 1           1               B
+## 2           2               A
+## 3           3               B
+## 4           4               A
+## 5           5               A
+## 6           6               C
+## 7           7               D
+## 8           8               B
+## 9           9               A
+## 10         10               A
+## 11         11               B
+## 12         12               C
+## 13         13               B
+## 14         14               A
+## 15         15               E
+## 16         16               E
+## 17         17               A
+## 18         18               B
+## 19         19               B
+## 20         20               B</code></pre>
+</div>
 </div>
 
 
