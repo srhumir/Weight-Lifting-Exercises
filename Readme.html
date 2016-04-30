@@ -121,9 +121,57 @@ $(document).ready(function () {
 <p>Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, our goal is to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in five different ways. One totally right and the four others with a common mistake. We will predict how well a given person done the job using these accelerometers.</p>
 <p>More information is available from the website here: <a href="http://groupware.les.inf.puc-rio.br/har" class="uri">http://groupware.les.inf.puc-rio.br/har</a> (see the section on the Weight Lifting Exercise Dataset).</p>
 </div>
-<div id="data-explanation" class="section level1">
-<h1>Data Explanation</h1>
-<p>The provided dataset contains the the name of voluonteer, time stamp, 56</p>
+<div id="synopsis" class="section level1">
+<h1>Synopsis</h1>
+<p>The provided dataset contains the the name of voluonteer, time stamp, 56 measurment by accelometers, 96 statistica calculated by moving window on them and the class of actvity, “A” for totally right and “B-E” for four commom mistakes. As we are supposed to predict the class of activity based on sigle measurments by acceleometers, we can not use statistics. So we are limited to 56 measurments. These are still too many variables and make the trainig too slow. To reduce the variables. We first ommit the highly correlated variables. Then train a classification tree on the remaining data. Finally choose the most imortant variables based on this model. Finally train a random forest model on the remaining variables. The final out of sample accuracy based on 50% of data for trainig and 50% for testing is 97%. We did not use cross validation as there are enough data (aroung 20 thousand) in the trainig set.</p>
+</div>
+<div id="details-of-doing-the-job" class="section level1">
+<h1>Details of doing the job</h1>
+<p>First of all the data are downloaded and loaded into R</p>
+<pre class="r"><code>library(caret)
+library(reshape)
+#downloading and reading the data
+if (!file.exists(&quot;pml-trainig.csv&quot;)){
+        download.file(&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv&quot;,
+                      destfile = &quot;pml-trainig.csv&quot;)
+}
+if (!file.exists(&quot;pml-testing.csv&quot;)){
+        download.file(&quot;https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv&quot;,
+                      destfile = &quot;pml-testing.csv&quot;)
+}
+roughtrainig &lt;- read.csv(&quot;pml-trainig.csv&quot;)
+roughtesting &lt;- read.csv(&quot;pml-testing.csv&quot;)</code></pre>
+<pre><code>## Loading required package: lattice</code></pre>
+<pre><code>## Loading required package: ggplot2</code></pre>
+<p>Then I took a look at variables names.</p>
+<pre class="r"><code>names(roughtrainig)[1:10]</code></pre>
+<pre><code>##  [1] &quot;X&quot;                    &quot;user_name&quot;            &quot;raw_timestamp_part_1&quot;
+##  [4] &quot;raw_timestamp_part_2&quot; &quot;cvtd_timestamp&quot;       &quot;new_window&quot;          
+##  [7] &quot;num_window&quot;           &quot;roll_belt&quot;            &quot;pitch_belt&quot;          
+## [10] &quot;yaw_belt&quot;</code></pre>
+<p>The names of variables contiaing statisctics started with one of the wrods, “max”, “min”, “stddev”, “avg”, “amplitude”, “kurtosis”,“skewness” or “var”. So I check which columns contain these data and removed them.</p>
+<pre class="r"><code>#Getting the field with statistics
+indlist &lt;- sapply(list(&quot;max&quot;, &quot;min&quot;, &quot;stddev&quot;, &quot;avg&quot;, &quot;amplitude&quot;, &quot;kurtosis&quot;,&quot;skewness&quot;, &quot;^var&quot;),
+              function(s) grep(s, names(roughtrainig)))
+ind &lt;-vector() 
+for (i in 1:length(indlist)){
+        ind &lt;- c(ind, indlist[[i]])
+}
+data &lt;- roughtrainig[,-ind]</code></pre>
+<p>Then I removed the forst seven columns which do not actually contain measurments.</p>
+<pre class="r"><code>#removing first 7 columns
+data &lt;- data[, -c(1:7)]</code></pre>
+<p>The variables need to be converted to numeric. As they might be saved as character.</p>
+<pre class="r"><code>#converting all data to numeric
+for (i in 1:(dim(data)[2]-1)){
+        data[,i] &lt;- as.numeric(data[,i])
+}</code></pre>
+<p>From this step I start summerizing the data. First I remove variables which are highly correlated to others. “caret” package has tow very usefull functions for this, “cor” which produce a correlation matrix. and “findCorrelation” which cut too correlated variables.</p>
+<pre class="r"><code>#removing features which are highly correlated
+correlationMatrix &lt;- cor(data[,-dim(data)[2]])
+highlyCorrelated &lt;- findCorrelation(correlationMatrix, cutoff=.8)
+data &lt;- data[,-highlyCorrelated]</code></pre>
+<p>13 variables are removed leaving 40 variables. But it is still too much for runnig a random forest.</p>
 </div>
 
 
