@@ -2,19 +2,20 @@
 title: "Weight lifting Analysis"
 author: "Reza"
 date: "29 April 2016"
-output: html_document
+output: md_document
 ---
 
 #Introduction
-Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, our goal is to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in five different ways. One totally right and the four others with a common mistake.
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, our goal is to use data from accelerometers on the belt, forearm, arm, and dumbbell of six participants. They were asked to perform barbell lifts correctly and incorrectly in five different ways. One totally right and the four others with a common mistake.
 We will predict how well a given person done the job using these accelerometers.
 
 More information is available from the website here: http://groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).
 
 #Synopsis
-The provided dataset contains the the name of voluonteer, time stamp, `r 160-7-1-96` measurment by accelometers, 96 statistica calculated by moving window on them and the class of actvity, "A" for totally right and "B-E" for four commom mistakes. As we are supposed to predict the class of activity based on sigle measurments by acceleometers, we can not use statistics. So we are limited to `r 160-7-1-96` measurments. These are still too many variables and make the trainig too slow. To reduce the variables. We first ommit the highly correlated variables. Then train a classification tree on the remaining data. Finally choose the most imortant variables based on this model. Finally train a random forest model on the remaining variables. The final out of sample accuracy based on 50% of data for trainig and 50% for testing is 97%. We did not use cross validation as there are enough data (aroung 20 thousand) in the trainig set.
+The provided dataset contains the the name of volunteer, time stamp, `r 160-7-1-96` measurement by accelometers, 96 statistics calculated by moving window on them and the class of activity, "A" for totally right and "B-E" for four common mistakes. As we are supposed to predict the class of activity based on single measurements by acceleometers, we can not use statistics. So we are limited to `r 160-7-1-96` measurements. These are still too many variables and make the training too slow. To reduce the variables. We first omit the highly correlated variables. Then train a classification tree on the remaining data. Finally choose the most important variables based on this model. Finally train a random forest model on the remaining variables. The final out of sample accuracy based on 50% of data for training and 50% for testing is 98.5%. We did not use cross validation as there are enough data (around 20 thousand) in the training set.
 
 #Details of doing the job
+###Loading the dataset
 First of all the data are downloaded and loaded into R
 ```{r message=FALSE, cache=TRUE}
 library(caret)
@@ -34,12 +35,14 @@ roughtesting <- read.csv("pml-testing.csv")
 ```{r echo=FALSE, message=FALSE}
 library(caret)
 ```
+
+###Exploring and cleaning the dataset
 Then I took a look at variables names.
 ```{r }
 names(roughtrainig)
 ```
 
-The names of variables contiaing statisctics started with one of the wrods, "max", "min", "stddev", "avg", "amplitude", "kurtosis","skewness" or "var". So I check which columns contain these data and removed them.
+The names of variables containing statistics started with one of the words, "max", "min", "stddev", "avg", "amplitude", "kurtosis","skewness" or "var". So I checked which columns contain these data and removed them.
 ```{r}
 #Getting the variables containig statistics
 indlist <- sapply(list("max", "min", "stddev", "avg", "amplitude", "kurtosis","skewness", "^var"),
@@ -50,7 +53,9 @@ for (i in 1:length(indlist)){
 }
 data <- roughtrainig[,-ind]
 ```
-Then I removed the forst seven columns which do not actually contain measurments. 
+
+###Cleaning the dataset
+Then I removed the first seven columns which do not actually contain measurements. 
 ```{r}
 #removing first 7 columns
 data <- data[, -c(1:7)]
@@ -62,14 +67,16 @@ for (i in 1:(dim(data)[2]-1)){
         data[,i] <- as.numeric(data[,i])
 }
 ```
-From this step I start summerizing the data. First I remove variables which are highly correlated to others. "caret" package has tow very usefull functions for this, "cor" which produce a correlation matrix. and "findCorrelation" which cut too correlated variables.
+
+###Summarizing the data
+From this step I start summarizing the data. First I remove variables which are highly correlated to others. "caret" package has tow very useful functions for this, "cor" which produce a correlation matrix. and "findCorrelation" which cut too correlated variables.
 ```{r}
 #removing features which are highly correlated
 correlationMatrix <- cor(data[,-dim(data)[2]])
 highlyCorrelated <- findCorrelation(correlationMatrix, cutoff=.8)
 data <- data[,-highlyCorrelated]
 ```
-`r length(highlyCorrelated)` variables are removed leaving `r dim(data)[2]-1` variables. But it is still too much for runnig a random forest. First divide the dataset to trainig and testing subsets half of data to each subset.
+`r length(highlyCorrelated)` variables are removed leaving `r dim(data)[2]-1` variables. But it is still too much for running a random forest. First divide the dataset to training and testing subsets half of data to each subset.
 ```{r}
 #divide to trian and test
 set.seed(1234)
@@ -77,7 +84,7 @@ indtrain <- createDataPartition(data$classe, p = .5, list = F)
 training <- data[indtrain,]
 testing <- data[-indtrain,]
 ```
-To reduce the number of variales, one idea would be using PCA. I tried that too but did not get better result with lots of more proccesing time. So I decided to use another method. 
+To reduce the number of variables, one idea would be using PCA. I tried that as well but did not get better results with lots of more processing time. So I decided to use another method. 
 
 In the other approach I used the variable importance function in "caret". I firstly trained a decision tree model (rpart) on all the data which by the way did not show a good out of sample accuracy.
 ```{r message=FALSE}
@@ -93,13 +100,14 @@ Impvars2 <- row.names(varImp(modelTree)$importance)[varImp(modelTree)$importance
 ```
 Leave us by `r length(Impvars2)` variables. 
 
-Now I seperate just these `r length(Impvars2)` variables and train a random forest model on them.
+###Trainig the model
+Now I separated just these `r length(Impvars2)` variables and train a random forest model on them.
 ```{R cache=TRUE, message=FALSE}
 trainingRF <- training[,Impvars2]
 modelRF <- train(trainingRF, training$classe, method = "rf")
 ```
 
-##Testing the model
+###Testing the model
 Now it is time to test the model. First choose important variables on the testing dataset.
 ```{r message=FALSE}
 #test the model
@@ -113,12 +121,12 @@ Finally make the confusion matrix.
 ```{r message=FALSE}
 confMat <- confusionMatrix(predRF, testing$classe)
 ```
-The overall accuracy of the model is `r round(confMat$overall["Accuracy"], digits=4)*100`% acceptingly good. The better news is that the sensitivity and specifity on class "A" (doing the job right) are respectively `r round(confMat$byClass[1,"Sensitivity"], digits=4)` and `r round(confMat$byClass[1,"Specificity"], digits=4)`. This means that when the prediction is "A" we are `r round(confMat$byClass[1,"Sensitivity"], digits=4)*100`% confident that the job was done right and when the prediction is not "A", we are `r round(confMat$byClass[1,"Specificity"], digits=4)*100`% confident that the job was really done wrong. 
+The overall accuracy of the model is `r round(confMat$overall["Accuracy"], digits=4)*100`% acceptingly good. The better news is that the sensitivity and specificity on class "A" (doing the job right) are respectively `r round(confMat$byClass[1,"Sensitivity"], digits=4)` and `r round(confMat$byClass[1,"Specificity"], digits=4)`. This means that when the prediction is "A" we are `r round(confMat$byClass[1,"Sensitivity"], digits=4)*100`% confident that the job was done right and when the prediction is not "A", we are `r round(confMat$byClass[1,"Specificity"], digits=4)*100`% confident that the job was really done wrong. 
 
-##Predicting the provided test data
+#Predicting the provided test data
 In this section I run the model on the test dataset provided and loaded in first section by name "roughtesting". 
 
-First the dataset should look like our trainig dataset i.e. extra variables have to be removed and variables have to be converted to numeric.
+First the dataset should look like our training dataset i.e. extra variables have to be removed and variables have to be converted to numeric.
 ```{r message=FALSE}
 ##remove statistics
 validation <- roughtesting[,-ind]
@@ -139,3 +147,8 @@ Now predict the class of each row and show the result
 predVali <- predict(modelRF, validation)
 data.frame(Row.Number=as.factor(1:20),Predicted.Class=predVali)
 ```
+#Reference
+Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013.
+
+Read more: http://groupware.les.inf.puc-rio.br/har#ixzz47LMYDnT4
+

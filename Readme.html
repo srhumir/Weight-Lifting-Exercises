@@ -118,15 +118,17 @@ $(document).ready(function () {
 
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
-<p>Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, our goal is to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in five different ways. One totally right and the four others with a common mistake. We will predict how well a given person done the job using these accelerometers.</p>
+<p>Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, our goal is to use data from accelerometers on the belt, forearm, arm, and dumbbell of six participants. They were asked to perform barbell lifts correctly and incorrectly in five different ways. One totally right and the four others with a common mistake. We will predict how well a given person done the job using these accelerometers.</p>
 <p>More information is available from the website here: <a href="http://groupware.les.inf.puc-rio.br/har" class="uri">http://groupware.les.inf.puc-rio.br/har</a> (see the section on the Weight Lifting Exercise Dataset).</p>
 </div>
 <div id="synopsis" class="section level1">
 <h1>Synopsis</h1>
-<p>The provided dataset contains the the name of voluonteer, time stamp, 56 measurment by accelometers, 96 statistica calculated by moving window on them and the class of actvity, “A” for totally right and “B-E” for four commom mistakes. As we are supposed to predict the class of activity based on sigle measurments by acceleometers, we can not use statistics. So we are limited to 56 measurments. These are still too many variables and make the trainig too slow. To reduce the variables. We first ommit the highly correlated variables. Then train a classification tree on the remaining data. Finally choose the most imortant variables based on this model. Finally train a random forest model on the remaining variables. The final out of sample accuracy based on 50% of data for trainig and 50% for testing is 97%. We did not use cross validation as there are enough data (aroung 20 thousand) in the trainig set.</p>
+<p>The provided dataset contains the the name of volunteer, time stamp, 56 measurement by accelometers, 96 statistics calculated by moving window on them and the class of activity, “A” for totally right and “B-E” for four common mistakes. As we are supposed to predict the class of activity based on single measurements by acceleometers, we can not use statistics. So we are limited to 56 measurements. These are still too many variables and make the training too slow. To reduce the variables. We first omit the highly correlated variables. Then train a classification tree on the remaining data. Finally choose the most important variables based on this model. Finally train a random forest model on the remaining variables. The final out of sample accuracy based on 50% of data for training and 50% for testing is 98.5%. We did not use cross validation as there are enough data (around 20 thousand) in the training set.</p>
 </div>
 <div id="details-of-doing-the-job" class="section level1">
 <h1>Details of doing the job</h1>
+<div id="loading-the-dataset" class="section level3">
+<h3>Loading the dataset</h3>
 <p>First of all the data are downloaded and loaded into R</p>
 <pre class="r"><code>library(caret)
 library(reshape)
@@ -141,6 +143,9 @@ if (!file.exists(&quot;pml-testing.csv&quot;)){
 }
 roughtrainig &lt;- read.csv(&quot;pml-trainig.csv&quot;)
 roughtesting &lt;- read.csv(&quot;pml-testing.csv&quot;)</code></pre>
+</div>
+<div id="exploring-and-cleaning-the-dataset" class="section level3">
+<h3>Exploring and cleaning the dataset</h3>
 <p>Then I took a look at variables names.</p>
 <pre class="r"><code>names(roughtrainig)</code></pre>
 <pre><code>##   [1] &quot;X&quot;                        &quot;user_name&quot;               
@@ -223,7 +228,7 @@ roughtesting &lt;- read.csv(&quot;pml-testing.csv&quot;)</code></pre>
 ## [155] &quot;accel_forearm_y&quot;          &quot;accel_forearm_z&quot;         
 ## [157] &quot;magnet_forearm_x&quot;         &quot;magnet_forearm_y&quot;        
 ## [159] &quot;magnet_forearm_z&quot;         &quot;classe&quot;</code></pre>
-<p>The names of variables contiaing statisctics started with one of the wrods, “max”, “min”, “stddev”, “avg”, “amplitude”, “kurtosis”,“skewness” or “var”. So I check which columns contain these data and removed them.</p>
+<p>The names of variables containing statistics started with one of the words, “max”, “min”, “stddev”, “avg”, “amplitude”, “kurtosis”,“skewness” or “var”. So I checked which columns contain these data and removed them.</p>
 <pre class="r"><code>#Getting the variables containig statistics
 indlist &lt;- sapply(list(&quot;max&quot;, &quot;min&quot;, &quot;stddev&quot;, &quot;avg&quot;, &quot;amplitude&quot;, &quot;kurtosis&quot;,&quot;skewness&quot;, &quot;^var&quot;),
               function(s) grep(s, names(roughtrainig)))
@@ -232,7 +237,10 @@ for (i in 1:length(indlist)){
         ind &lt;- c(ind, indlist[[i]])
 }
 data &lt;- roughtrainig[,-ind]</code></pre>
-<p>Then I removed the forst seven columns which do not actually contain measurments.</p>
+</div>
+<div id="cleaning-the-dataset" class="section level3">
+<h3>Cleaning the dataset</h3>
+<p>Then I removed the first seven columns which do not actually contain measurements.</p>
 <pre class="r"><code>#removing first 7 columns
 data &lt;- data[, -c(1:7)]</code></pre>
 <p>The variables need to be converted to numeric. As they might be saved as character.</p>
@@ -240,18 +248,21 @@ data &lt;- data[, -c(1:7)]</code></pre>
 for (i in 1:(dim(data)[2]-1)){
         data[,i] &lt;- as.numeric(data[,i])
 }</code></pre>
-<p>From this step I start summerizing the data. First I remove variables which are highly correlated to others. “caret” package has tow very usefull functions for this, “cor” which produce a correlation matrix. and “findCorrelation” which cut too correlated variables.</p>
+</div>
+<div id="summarizing-the-data" class="section level3">
+<h3>Summarizing the data</h3>
+<p>From this step I start summarizing the data. First I remove variables which are highly correlated to others. “caret” package has tow very useful functions for this, “cor” which produce a correlation matrix. and “findCorrelation” which cut too correlated variables.</p>
 <pre class="r"><code>#removing features which are highly correlated
 correlationMatrix &lt;- cor(data[,-dim(data)[2]])
 highlyCorrelated &lt;- findCorrelation(correlationMatrix, cutoff=.8)
 data &lt;- data[,-highlyCorrelated]</code></pre>
-<p>13 variables are removed leaving 39 variables. But it is still too much for runnig a random forest. First divide the dataset to trainig and testing subsets half of data to each subset.</p>
+<p>13 variables are removed leaving 39 variables. But it is still too much for running a random forest. First divide the dataset to training and testing subsets half of data to each subset.</p>
 <pre class="r"><code>#divide to trian and test
 set.seed(1234)
 indtrain &lt;- createDataPartition(data$classe, p = .5, list = F)
 training &lt;- data[indtrain,]
 testing &lt;- data[-indtrain,]</code></pre>
-<p>To reduce the number of variales, one idea would be using PCA. I tried that too but did not get better result with lots of more proccesing time. So I decided to use another method.</p>
+<p>To reduce the number of variables, one idea would be using PCA. I tried that as well but did not get better results with lots of more processing time. So I decided to use another method.</p>
 <p>In the other approach I used the variable importance function in “caret”. I firstly trained a decision tree model (rpart) on all the data which by the way did not show a good out of sample accuracy.</p>
 <pre class="r"><code>modelTree &lt;- train(classe~., data=training, method=&quot;rpart&quot;)</code></pre>
 <p>Then ran the varImp to get the most important variables.</p>
@@ -284,11 +295,15 @@ testing &lt;- data[-indtrain,]</code></pre>
 <p>I filtered the variables which have 14% or more importance.</p>
 <pre class="r"><code>Impvars2 &lt;- row.names(varImp(modelTree)$importance)[varImp(modelTree)$importance &gt;14]</code></pre>
 <p>Leave us by 14 variables.</p>
-<p>Now I seperate just these 14 variables and train a random forest model on them.</p>
+</div>
+<div id="trainig-the-model" class="section level3">
+<h3>Trainig the model</h3>
+<p>Now I separated just these 14 variables and train a random forest model on them.</p>
 <pre class="r"><code>trainingRF &lt;- training[,Impvars2]
 modelRF &lt;- train(trainingRF, training$classe, method = &quot;rf&quot;)</code></pre>
-<div id="testing-the-model" class="section level2">
-<h2>Testing the model</h2>
+</div>
+<div id="testing-the-model" class="section level3">
+<h3>Testing the model</h3>
 <p>Now it is time to test the model. First choose important variables on the testing dataset.</p>
 <pre class="r"><code>#test the model
 testinRF &lt;- testing[,Impvars2]</code></pre>
@@ -296,12 +311,13 @@ testinRF &lt;- testing[,Impvars2]</code></pre>
 <pre class="r"><code>predRF &lt;- predict(modelRF, testing)</code></pre>
 <p>Finally make the confusion matrix.</p>
 <pre class="r"><code>confMat &lt;- confusionMatrix(predRF, testing$classe)</code></pre>
-<p>The overall accuracy of the model is 96.95% acceptingly good. The better news is that the sensitivity and specifity on class “A” (doing the job right) are respectively 0.99 and 0.9906. This means when the prediction is “A” we are 99% confident that the job was done right and when the prediction is not “A”, we are 99.06% confident that the job was really done wrong.</p>
+<p>The overall accuracy of the model is 98.52% acceptingly good. The better news is that the sensitivity and specificity on class “A” (doing the job right) are respectively 0.9975 and 0.9974. This means that when the prediction is “A” we are 99.75% confident that the job was done right and when the prediction is not “A”, we are 99.74% confident that the job was really done wrong.</p>
 </div>
-<div id="predicting-the-provided-test-data" class="section level2">
-<h2>Predicting the provided test data</h2>
+</div>
+<div id="predicting-the-provided-test-data" class="section level1">
+<h1>Predicting the provided test data</h1>
 <p>In this section I run the model on the test dataset provided and loaded in first section by name “roughtesting”.</p>
-<p>First the dataset should look like our trainig dataset i.e. extra variables have to be removed and variables have to be converted to numeric.</p>
+<p>First the dataset should look like our training dataset i.e. extra variables have to be removed and variables have to be converted to numeric.</p>
 <pre class="r"><code>##remove statistics
 validation &lt;- roughtesting[,-ind]
 #removing first 7 columns
@@ -340,6 +356,10 @@ data.frame(Row.Number=as.factor(1:20),Predicted.Class=predVali)</code></pre>
 ## 19         19               B
 ## 20         20               B</code></pre>
 </div>
+<div id="reference" class="section level1">
+<h1>Reference</h1>
+<p>Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human ’13) . Stuttgart, Germany: ACM SIGCHI, 2013.</p>
+<p>Read more: <a href="http://groupware.les.inf.puc-rio.br/har#ixzz47LMYDnT4" class="uri">http://groupware.les.inf.puc-rio.br/har#ixzz47LMYDnT4</a></p>
 </div>
 
 
